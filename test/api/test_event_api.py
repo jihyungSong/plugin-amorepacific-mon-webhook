@@ -25,7 +25,7 @@ class TestEvent(TestCase):
         }
 
         parsed_data = self.monitoring.Event.parse({'options': options, 'raw_data': raw_data})
-        pprint(parsed_data)
+        print_json(parsed_data)
 
 
 if __name__ == "__main__":
