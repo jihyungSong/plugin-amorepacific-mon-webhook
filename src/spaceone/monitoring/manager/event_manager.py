@@ -1,10 +1,12 @@
 import logging
 import re
 from spaceone.core.manager import BaseManager
+from datetime import datetime
 from spaceone.monitoring.model.event_response_model import EventModel
 _LOGGER = logging.getLogger(__name__)
 
 TITLE_PARSING_META = [' - ']
+_TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%S'
 
 
 class EventManager(BaseManager):
@@ -30,7 +32,7 @@ class EventManager(BaseManager):
 
         """
 
-        parsed_list = []
+        default_parsed_data_list = []
 
         event_key = raw_data.get('event_id')
         ip_address = raw_data.get('host_ip')
@@ -55,16 +57,36 @@ class EventManager(BaseManager):
             'description': parsed_summary.get('body'),
             'title': parsed_summary.get('title'),
             'rule': metric_value,
-            'tags': {}
+            'occurred_at': self._occurred_at(raw_data),
+            'additional_info': {}
         }
 
         _LOGGER.debug(f'[EventManager] parse Event : {event_vo}')
 
         event_result_model = EventModel(event_vo, strict=False)
         event_result_model.validate()
+        event_result_model_native = event_result_model.to_native()
+        default_parsed_data_list.append(event_result_model_native)
 
-        parsed_list.append(event_result_model.to_primitive())
-        return parsed_list
+        return default_parsed_data_list
+
+    @staticmethod
+    def _occurred_at(raw_data):
+        current_time = datetime.now()
+        occurred_at = raw_data.get('event_time', current_time)
+        parsed_occurred_at = None
+        if isinstance(occurred_at, datetime):
+            parsed_occurred_at = occurred_at
+        else:
+            timestamp_str = occurred_at.split(' ')
+            if len(timestamp_str) != 2:
+                parsed_occurred_at = current_time
+            else:
+                date_object = datetime.strptime(f'{timestamp_str[0]}T{timestamp_str[1]}', _TIMESTAMP_FORMAT)
+                parsed_occurred_at = date_object
+
+        _LOGGER.debug(f'[EventManager] _occurred_at : {parsed_occurred_at}')
+        return parsed_occurred_at
 
     @staticmethod
     def _parse_summary(raw_data_summary):
