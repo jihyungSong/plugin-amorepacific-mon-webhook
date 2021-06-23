@@ -73,13 +73,14 @@ class EventManager(BaseManager):
             generated = utils.generate_id('amore-pacific', 4)
             hash_object = hashlib.md5(generated.encode())
             md5_hash = hash_object.hexdigest()
+            error_into_str = str(e)
             event_vo = {
                 'event_key': md5_hash,
-                'event_type': 'ERROR',
+                'event_type': 'ALERT',
                 'severity': 'CRITICAL',
                 'resource': {},
-                'description': '',
-                'title': 'Parsing ERROR',
+                'description': f'error_message: {error_into_str}',
+                'title': 'AmorePacific Parsing ERROR',
                 'rule': '',
                 'occurred_at': datetime.now(),
                 'additional_info': {}
