@@ -1,5 +1,7 @@
-import logging
 import re
+import logging
+import hashlib
+from spaceone.core import utils
 from spaceone.core.manager import BaseManager
 from datetime import datetime
 from spaceone.monitoring.model.event_response_model import EventModel
@@ -14,9 +16,7 @@ class EventManager(BaseManager):
         super().__init__(*args, **kwargs)
 
     def parse(self, options, raw_data):
-
         """
-
             {
                 "resource_name": "aplprdebawas01",
                 "urgency": "2",
@@ -31,7 +31,6 @@ class EventManager(BaseManager):
             }
 
         """
-
         default_parsed_data_list = []
 
         event_key = raw_data.get('event_id')
@@ -41,32 +40,55 @@ class EventManager(BaseManager):
         summary = raw_data.get('summary')
         event_resource_vo = {}
 
-        if ip_address is not None:
-            event_resource_vo.update({'ip_address': ip_address})
+        try:
 
-        if resource_id is not None:
-            event_resource_vo.update({'resource_id': resource_id})
+            if ip_address is not None:
+                event_resource_vo.update({'ip_address': ip_address})
 
-        parsed_summary = self._parse_summary(summary)
+            if resource_id is not None:
+                event_resource_vo.update({'resource_id': resource_id})
 
-        event_vo = {
-            'event_key': event_key,
-            'event_type': 'ALERT',
-            'severity': 'CRITICAL',
-            'resource': event_resource_vo,
-            'description': parsed_summary.get('body'),
-            'title': parsed_summary.get('title'),
-            'rule': metric_value,
-            'occurred_at': self._occurred_at(raw_data),
-            'additional_info': {}
-        }
+            parsed_summary = self._parse_summary(summary)
 
-        _LOGGER.debug(f'[EventManager] parse Event : {event_vo}')
+            event_vo = {
+                'event_key': event_key,
+                'event_type': 'ALERT',
+                'severity': 'CRITICAL',
+                'resource': event_resource_vo,
+                'description': parsed_summary.get('body'),
+                'title': parsed_summary.get('title'),
+                'rule': metric_value,
+                'occurred_at': self._occurred_at(raw_data),
+                'additional_info': {}
+            }
 
-        event_result_model = EventModel(event_vo, strict=False)
-        event_result_model.validate()
-        event_result_model_native = event_result_model.to_native()
-        default_parsed_data_list.append(event_result_model_native)
+            _LOGGER.debug(f'[EventManager] parse Event : {event_vo}')
+
+            event_result_model = EventModel(event_vo, strict=False)
+            event_result_model.validate()
+            event_result_model_native = event_result_model.to_native()
+            default_parsed_data_list.append(event_result_model_native)
+
+        except Exception as e:
+            generated = utils.generate_id('amore-pacific', 4)
+            hash_object = hashlib.md5(generated.encode())
+            md5_hash = hash_object.hexdigest()
+            error_into_str = str(e)
+            event_vo = {
+                'event_key': md5_hash,
+                'event_type': 'ALERT',
+                'severity': 'CRITICAL',
+                'resource': {},
+                'description': f'error_message: {error_into_str}',
+                'title': 'AmorePacific Parsing ERROR',
+                'rule': '',
+                'occurred_at': datetime.now(),
+                'additional_info': {}
+            }
+            event_result_model = EventModel(event_vo, strict=False)
+            event_result_model.validate()
+            event_result_model_native = event_result_model.to_native()
+            default_parsed_data_list.append(event_result_model_native)
 
         return default_parsed_data_list
 
@@ -75,15 +97,18 @@ class EventManager(BaseManager):
         current_time = datetime.now()
         occurred_at = raw_data.get('event_time', current_time)
         parsed_occurred_at = None
-        if isinstance(occurred_at, datetime):
-            parsed_occurred_at = occurred_at
-        else:
-            timestamp_str = occurred_at.split(' ')
-            if len(timestamp_str) != 2:
-                parsed_occurred_at = current_time
+        try:
+            if isinstance(occurred_at, datetime):
+                parsed_occurred_at = occurred_at
             else:
-                date_object = datetime.strptime(f'{timestamp_str[0]}T{timestamp_str[1]}', _TIMESTAMP_FORMAT)
-                parsed_occurred_at = date_object
+                timestamp_str = occurred_at.split(' ')
+                if len(timestamp_str) != 2:
+                    parsed_occurred_at = current_time
+                else:
+                    date_object = datetime.strptime(f'{timestamp_str[0]}T{timestamp_str[1]}', _TIMESTAMP_FORMAT)
+                    parsed_occurred_at = date_object
+        except Exception as e:
+            parsed_occurred_at = datetime.now()
 
         _LOGGER.debug(f'[EventManager] _occurred_at : {parsed_occurred_at}')
         return parsed_occurred_at
