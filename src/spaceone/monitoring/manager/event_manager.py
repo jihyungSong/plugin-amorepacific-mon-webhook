@@ -47,6 +47,7 @@ class EventManager(BaseManager):
 
             if resource_id is not None:
                 event_resource_vo.update({'resource_id': resource_id})
+                event_resource_vo.update({'name': f'{resource_id}'})
 
             parsed_summary = self._parse_summary(summary)
 
