@@ -50,13 +50,14 @@ class EventManager(BaseManager):
         event_key = raw_data.get('event_id')
         ip_address = raw_data.get('host_ip')
         resource_id = raw_data.get('resource_name')
-        metric_value = raw_data.get('metric_value')
+        metric_name = raw_data.get('metric_name').strip() if isinstance(raw_data.get('metric_name'), str) else ''
+        metric_value = raw_data.get('metric_value').strip() if isinstance(raw_data.get('metric_value'), str) else ''
         event_resource_vo = {}
 
         try:
 
-            if ip_address is not None:
-                event_resource_vo.update({'ip_address': ip_address})
+            # if ip_address is not None:
+            #     event_resource_vo.update({'ip_address': ip_address})
 
             if resource_id is not None:
                 event_resource_vo.update({'resource_id': resource_id})
@@ -71,7 +72,7 @@ class EventManager(BaseManager):
                 'resource': event_resource_vo,
                 'description': parsed_summary.get('body'),
                 'title': parsed_summary.get('title'),
-                'rule': metric_value,
+                'rule': f'{metric_name}: {metric_value}',
                 'occurred_at': self._occurred_at(raw_data),
                 'additional_info': {}
             }
@@ -90,7 +91,7 @@ class EventManager(BaseManager):
             error_message = repr(e)
             event_vo = {
                 'event_key': md5_hash,
-                'event_type': 'ALERT',
+                'event_type': 'ERROR',
                 'severity': 'CRITICAL',
                 'resource': {},
                 'description': error_message,
