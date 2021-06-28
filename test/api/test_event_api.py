@@ -11,20 +11,7 @@ class TestEvent(TestCase):
     def test_parse(self):
 
         options = {}
-        raw_data = {
-                "status": "UP ",
-                "event_time": "2021-06-27 02:16:42",
-                "host_ip": "172.28.102.69",
-                "threshold": "ecp-api.log_member",
-                "resource_name": "EAPWAS-172.28.102.69",
-                "event_id": "32326930",
-                "conditionlog": "[1회 발생] 이벤트 탐지 [심각도: ERROR, 내용: [2021-06-27 02:16:37,820] [ERROR] [ http-nio-8080-exec-6] [B2CMON_LOG.logging:124] [MON|2021-06-27 02:16:37,820|ERROR|M01||MobileWeb|member||||MLEC_MEMBER_AUTH_FAILURE|/MON] Fail. API=post:/v1/M01/ap/members/joinOnLogin, resultMsg=Authentication Failure [MemberUtils.memberMonLoggingError:457 < ApMemberAuthRestApi.login:318 < ApMemberAuthRestApi.joinOnLogin:415 < GeneratedMethodAccessor4877.invoke:-1 < DelegatingMethodAccessorImpl.invoke:43]]",
-                "summary": "01. APMALL>EAPWAS-172.28.102.69>monitor group>ecp-api.log_member",
-                "metric_value": "이벤트 탐지 [심각도: ERROR , 개행 포함, 내용 패턴: (?=.*member.*)(^((?!MLEC_MEMBER_NOT_FOUND).)*$)] ",
-                "urgency": "2",
-                "metric_name": "회원_경고로그 ",
-                "severity": "경고"
-            }
+        raw_data = {}
 
         raw_data_2 = {
                 "event_time": "2021-06-27 02:16:43",
@@ -143,7 +130,7 @@ class TestEvent(TestCase):
                 "metric_name": "롤백 발생 "
             }
 
-        param_list = [
+        param_list = [raw_data,
                       raw_data_2,
                       raw_data_3,
                       raw_data_4,
