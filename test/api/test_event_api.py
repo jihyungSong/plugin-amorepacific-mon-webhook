@@ -11,7 +11,6 @@ class TestEvent(TestCase):
     def test_parse(self):
 
         options = {}
-        raw_data = {}
 
         raw_data_2 = {
                 "event_time": "2021-06-27 02:16:43",
@@ -130,7 +129,7 @@ class TestEvent(TestCase):
                 "metric_name": "롤백 발생 "
             }
 
-        param_list = [raw_data,
+        param_list = [{},
                       raw_data_2,
                       raw_data_3,
                       raw_data_4,
@@ -141,9 +140,10 @@ class TestEvent(TestCase):
                       raw_data_9,
                       raw_data_10,
                       ]
-        for idx, param in enumerate(param_list):
+
+        for idx, raw_dt in enumerate(param_list):
             print(f'#### {idx} ####')
-            parsed_data = self.monitoring.Event.parse({'options': options, 'data': raw_data})
+            parsed_data = self.monitoring.Event.parse({'options': options, 'data': raw_dt})
             print_json(parsed_data)
             print()
 
