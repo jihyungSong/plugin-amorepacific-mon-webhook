@@ -175,9 +175,7 @@ class EventManager(BaseManager):
 
     @staticmethod
     def _get_event_type(severity):
-        print(severity)
         event_type = 'ERROR'
-
         if severity in ['CRITICAL', 'ERROR', 'WARNING']:
             event_type = 'ALERT'
         elif severity in ['INFO']:
