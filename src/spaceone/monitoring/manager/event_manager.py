@@ -56,11 +56,12 @@ class EventManager(BaseManager):
             metric_name = raw_data.get('metric_name').strip() if isinstance(raw_data.get('metric_name'), str) else ''
             metric_value = raw_data.get('metric_value').strip() if isinstance(raw_data.get('metric_value'), str) else ''
             parsed_summary = self._parse_summary(raw_data)
+            severity = self._get_severity(raw_data)
 
             event_vo = {
                 'event_key': self._get_event_key(raw_data),
-                'event_type': self._get_severity(raw_data),
-                'severity': self._get_severity(raw_data),
+                'event_type': self._get_event_type(severity),
+                'severity': severity,
                 'resource': self._get_resource(raw_data),
                 'description': parsed_summary.get('body'),
                 'title': parsed_summary.get('title'),
@@ -175,7 +176,6 @@ class EventManager(BaseManager):
     @staticmethod
     def _get_event_type(severity):
         event_type = 'ERROR'
-
         if severity in ['CRITICAL', 'ERROR', 'WARNING']:
             event_type = 'ALERT'
         elif severity in ['INFO']:
