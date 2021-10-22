@@ -18,16 +18,15 @@ class EventManager(BaseManager):
     def parse(self, raw_data):
 
         results = []
-        # resource_name ip or id or name
+
         try:
-            summary = self._remove_blank(raw_data.get('summary', ''))
-            metric_name = self._remove_blank(raw_data.get('metric_name', ''))
-            host_ip = self._remove_blank(raw_data.get('host_ip', ''))
-            severity = self._get_severity(self, raw_data.get('severity', ''))
-            event_key = self._get_event_key(summary, metric_name, host_ip)
+            summary = raw_data.get('summary', '')
+            metric_name = raw_data.get('metric_name', '')
+            severity = self._get_severity(raw_data.get('severity', ''))
+            resource = self._get_resource(raw_data)
+            event_key = self._get_event_key(self, summary, metric_name, resource)
             event_type = self._get_event_type(severity)
             description = raw_data.get('conditionlog', '')
-            resource = self._get_resource(raw_data)
             occured_at = self._get_occurred_at(raw_data.get('event_time', datetime.now()))
             additional_info = self._get_additional_info(self, raw_data)
 
@@ -48,61 +47,34 @@ class EventManager(BaseManager):
             return results
 
         except Exception as e:
-            '''
-            generated = utils.generate_id('amore-pacific', 4)
-            hash_object = hashlib.md5(generated.encode())
-            md5_hash = hash_object.hexdigest()
-            error_message = repr(e)
-
-            event_dict = {
-                'event_key': md5_hash,
-                'event_type': 'ERROR',
-                'severity': 'CRITICAL',
-                'resource': {},
-                'description': error_message,
-                'title': 'AmorePacific Parsing ERROR',
-                'rule': '',
-                'occurred_at': datetime.now(),
-                'additional_info': {}
-            }
-            event_vo = self._validate_parsed_event(event_dict)
-            results.append(event_vo)
-            _LOGGER.debug(f'[EventManager] parse Event(parsingError) : {event_dict}')
-            return results
-            '''
+            _LOGGER.error(f'[EventManager] parse Event(parsingError)  : {event_dict}')
 
     @staticmethod
     def _get_occurred_at(event_time):
-        occurred_at = event_time
-
         try:
-            if not isinstance(occurred_at, datetime):
-                timestamp_str = occurred_at.split(' ')
-                if len(timestamp_str) != 2:
-                    occurred_at = datetime.now()
-                else:
-                    date_object = datetime.strptime(f'{timestamp_str[0]}T{timestamp_str[1]}', '%Y-%m-%dT%H:%M:%S')
-                    occurred_at = date_object
+            occured_at = datetime.strptime(event_time, '%Y-%m-%d %H:%M:%S')
 
-            _LOGGER.debug(f'[EventManager] _occurred_at : {occurred_at}')
-            print(type(occurred_at))
-            return occurred_at
+            _LOGGER.debug(f'[EventManager] _occurred_at : {occured_at}')
+            return occured_at
 
         except Exception as e:
-            parsed_occurred_at = datetime.now()
-            _LOGGER.error(f'[EventManager] _occurred_at : {parsed_occurred_at} due to {e}')
-
+            current_time = datetime.now()
+            _LOGGER.error(f'[EventManager] _occurred_at : {current_time} due to {e}')
+            return current_time
 
     @staticmethod
-    def _get_event_key(summary, metric_name, host_ip):
-        event_key_base = f'{summary}' + f'{metric_name}' + f'{host_ip}'
+    def _get_event_key(self, summary, metric_name, resource):
+        resource_name = resource.get('name', '')
+        summary = self._remove_blank(summary)
+        metric_name = self._remove_blank(metric_name)
+        event_key_base = f'{summary}:{metric_name}:{resource_name}'
         hash_object = hashlib.md5(event_key_base.encode())
         md5_hash = hash_object.hexdigest()
 
         return md5_hash
 
     @staticmethod
-    def _get_severity(self, severity):  # TODO: NOT AVAILABLE..?
+    def _get_severity(severity):
         """
                심각 : CRITICAL
                경고 : ERROR
@@ -111,8 +83,6 @@ class EventManager(BaseManager):
                CRITICAL | ERROR | WARNING | INFO | NOT_AVAILABLE | NONE(default)
                ------
                """
-        severity = self._remove_blank(severity)
-
         severity_flag = 'NONE'
 
         if severity == '심각':
@@ -130,10 +100,12 @@ class EventManager(BaseManager):
     def _get_resource(raw_data):
         resource_info = {}
         if 'host_ip' in raw_data:
-            resource_info.update({'name': raw_data.get('host_ip')})
 
-        elif 'resource_name' in raw_data:
+        if 'resource_name' in raw_data:
             resource_info.update({'name': raw_data.get('resource_name')})
+
+        elif 'host_ip' in raw_data:
+            resource_info.update({'name': raw_data.get('host_ip')})
 
         return resource_info
 
