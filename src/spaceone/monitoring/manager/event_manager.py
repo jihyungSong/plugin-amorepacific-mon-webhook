@@ -139,7 +139,6 @@ class EventManager(BaseManager):
 
     @staticmethod
     def _get_event_type(severity):
-        print(f'severity: {severity}')
         event_type = 'ALERT'
         if severity in ['심각', '경고', '주의']:
             event_type = 'ALERT'
@@ -168,7 +167,6 @@ class EventManager(BaseManager):
                 additional_trimmed_data = self._remove_blank(raw_data.get(raw_data_key))
                 additional_info.update({raw_data_key: additional_trimmed_data})
 
-        print(f'additional_info : {additional_info}')
         return additional_info
 
     @staticmethod

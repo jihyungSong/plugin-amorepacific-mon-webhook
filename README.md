@@ -1,5 +1,6 @@
 # plugin-amorepacific-monitoring-webhook
-Webhook Plugin for Amore-pacific
+Webhook Plugin for Amore-Pacific monitoring system <br>
+
 # Data Model
 
 ## Amore Pacific Raw Data Examples
@@ -40,14 +41,14 @@ Webhook Plugin for Amore-pacific
 | ---      | ---     | ---           | ---           |
 | event_id | str  | auto generation | event-1234556  |
 | event_key | str | fingerprint | 469fd6fbb9dbabaa |
-| event_type | str | RECOVERY , ALERT based on `raw_data.state` | RECOVERY	|
-| title | str	| `raw_data.annotations.summary`	| Pod has been in a non-ready state for more than 15 minutes.	|
-| description | str | `raw_data.annotations.description`	| Pod prometheus/prometheus-xxx has been in a non-ready state for longer than 15 minutes.|
-| severity | str  | alert level based `raw_data.alert.labels.severity (critical : CRITICAL / error : ERROR / warning: WARNING / info: INFO ` | ERROR |
-| resource | dict | resource which triggered this alert	| ` {'pod':'prometheus-prometheus-node-exporter-xp6jv','alertname': 'KubePodNotReady'}` |
-| raw_data | dict | Prometheus webhook received  data structure | - |
-| addtional_info | dict | `raw_data.alert.annotations` / `raw_data.alert.generatorURL`, `raw_data.alert.endsAt` | `{"org_id": "1.0", "rule_url" "https://...." }` |
-| occured_at | datetime | prometheus alert triggered time , `alert.startsAt` | `2021-10-12T04:13:01.794Z`|
+| event_type | str | RECOVERY , ALERT based on `raw_data.severity` | RECOVERY	|
+| title | str | `raw_data.summary`	| [Wait For Element to Editable Time Out.\nPage Info |
+| description | str | `raw_data.conditionlog` | Wait For Element to Editable Time Out.\nPage Info |
+| severity | str | alert level based `raw_data.severity (심각 : CRITICAL / 경고 : ERROR / 주의: WARNING / 해제: INFO ` (default: `NONE`) | ERROR |
+| resource | dict | resource which triggered this alert `raw_data.host_ip` / `raw_data.resource_name`	| `{"name": "WAS-xxx.xx.xxx.xxx"}`|
+| raw_data | dict | Amore pacific webhook received data structure | - |
+| addtional_info | dict | Alert's additional information. `raw_data.event_id , raw_data.status, raw_data.threshold, raw_data.urgency, raw_data.metric_value, raw_data.metric_name` | `{'additional_info': {'event_id': '32545700', 'metric_name': '회원_주의로그','status': 'UP','threshold': 'ecp-api.log_member',  'urgency': '1'}` |
+| occured_at | datetime | Alert triggered time. `raw_data.event_time` | `2021-10-12T04:13:01.794Z`|
 | alert_id | str | mapped alert_id	| alert-3243434343 |
 | webhook_id | str  | webhook_id	| webhook-34324234234234 |
 | project_id | str	| project_id	| project-12312323232    |
