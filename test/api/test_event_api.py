@@ -128,21 +128,36 @@ class TestEvent(TestCase):
                 "conditionlog": "Rollback 수 [0.02 Count/s (> 0 Count/s)]",
                 "metric_name": "롤백 발생 "
             }
+        raw_data_11 = {
+            "status": "UP ",
+            "summary": "01. APMALL>EAPWAS-172.28.103.124>monitor group>ecp-api.log_member",
+            "urgency": "1",
+            "resource_name": "EAPWAS-172.28.103.124",
+            "metric_value": "이벤트 탐지 [심각도: WARN , 개행 포함, 내용 패턴: .*member.*] ",
+            "metric_name": "회원_주의로그 ",
+            "event_id": "32545700",
+            "severity": "주의",
+            "host_ip": "172.28.103.124",
+            "threshold": "ecp-api.log_member",
+            "conditionlog": "[1회 발생] 이벤트 탐지 [심각도: WARN, 내용: [2021-06-29 21:51:09,423] [ WARN] [http-nio-8080-exec-42] [B2CMON_LOG.logging:130] [MON|2021-06-29 21:51:09,423|WARN|M01||MobileApp|member||||MLEC_MEMBER_PASSWORD_NOT_MATCH|/MON] Fail. API=post:/v1/M01/ap/members/login, resultMsg=Password Not Match [MemberUtils.memberMonLoggingError:457 < ApMemberAuthRestApi.login:284 < ApMemberAuthRestApi.memberLogin:334 < GeneratedMethodAccessor3346.invoke:-1 < DelegatingMethodAccessorImpl.invoke:43]]",
+            "event_time": "2021-06-29 09:51:12"
+        }
 
-        param_list = [{},
-                      raw_data_2,
-                      raw_data_3,
-                      raw_data_4,
-                      raw_data_5,
-                      raw_data_6,
-                      raw_data_7,
-                      raw_data_8,
-                      raw_data_9,
-                      raw_data_10,
+        param_list = [
+                      # raw_data_2,
+                      # raw_data_3,
+                      # raw_data_4,
+                      # raw_data_5,
+                      # raw_data_6,
+                      # raw_data_7,
+                      # raw_data_8,
+                      # raw_data_9,
+                      raw_data_11
                       ]
 
         for idx, raw_dt in enumerate(param_list):
             print(f'#### {idx} ####')
+            print(raw_dt)
             parsed_data = self.monitoring.Event.parse({'options': options, 'data': raw_dt})
             print_json(parsed_data)
             print()

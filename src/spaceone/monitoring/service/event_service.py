@@ -31,8 +31,7 @@ class EventService(BaseService):
 
         """
 
-        options = params.get('options')
         raw_data = params.get('data')
-        parsed_event = self.event_mgr.parse(options, raw_data)
+        parsed_event = self.event_mgr.parse(raw_data)
         _LOGGER.debug(f'[EventService: parse] {parsed_event}')
         return parsed_event
